@@ -87,7 +87,11 @@
   - [106 发送邮件](#106-springboot发送邮件)
 
 - [CSS样式层叠](#css样式层叠)
-  - [常用css样式](#常用css样式集合)
+  - [字体样式](#常用字体样式)
+
+  - [容器样式](#常用容器样式)
+
+  - [flex布局](#flex布局)
 
 
 # 前端 {#chapter-0}
@@ -4054,80 +4058,178 @@ public void sendMailTryout() {
 
 # CSS样式层叠
 
-## 常用css样式集合
+## 常用字体样式
 
 ```html
 <style>
 .test{
-  
-  font-size: 20px;//字体大小
+  /* 字体 */
 
-  font-weight: 700;//字体宽度
-   
-  color: red;//容器内部颜色
+  font-family: Source Han Sans CN, Source Han Sans CN; // 字体样式
 
-  opacity: 50%;//元素透明度
+  font-size: 20px; // 字体大小
 
-  background-color: red;//背景颜色
+  font-weight: 700; // 字体宽度
 
-  background: linear-gradient(90deg,red,green);//背景颜色线性渐变
+  color: red; // 颜色
 
-  background-image: url(../img.png);//背景图片
+  line-height: 27px; // 行高
 
-  background-position: center;//背景图片位置
+  text-align: left; // 字体布局（居左、居中、居右）
 
-  background-size: auto;//背景图片尺寸
-  background-size: 65%;//百分比缩放
+  font-style: normal; // 字体样式
 
-  background-repeat: no-repeat;//背景图片重复
+  text-transform: none; // 字体变化
 
-  border-style: solid;//边框样式
+  white-space: nowrap;//元素内字符取消换行
 
-  border-width: 1px;//边框线宽度
+  white-space: pre;//字符每行缩近
 
-  border-radius: 12px;//边框圆角
-  border-radius: 0 12px 1px 0 ;//四个角自定义圆角
+  white-space: pre-wrap;//字符每段缩近
+}
+</style>
+```
 
-  position: fixed;//容器绝对定位
-  position: absolute;//容器相对当前页面定位
-  position: relative;//容器相对当前位置偏移
+## 常用容器样式
 
-  top: 200px;//容器纵向位置
+```html
+<style>
+.test{
 
-  left: 200px;//容器横向位置
+/* 容器基础样式 */
 
   width: 200px;//容器宽度
 
   height: 200px;//容器高度
 
-  float: left;//容器左浮动
-  float: right;//容器右浮动
 
-  padding: 10px;//容器内边距
-  padding: 10px 20px 1px 0;//自动以容器四边内边距
+/* 容器背景 */
 
-  box-shadow: 10px 5px 5px red;//容器阴影(填入：x偏移量、y偏移量、模糊半径、扩散半径、颜色)
+  background-color: red; // 背景颜色
 
-  transform: 30deg;//旋转、缩放、倾斜、平移元素
+  background: linear-gradient(90deg,red,green); // 背景颜色线性渐变
 
-  margin-top: 10px;//元素顶部距离上个元素位置
-  margin-left: 10px;//左侧
-  margin-right: 10px;//右侧
-  margin-bottom: 10px;//底部
+  background-image: url(../img.png); // 背景图片
 
-  display: inline-block;//将块元素转为行内元素
-  display: none;//将元素隐藏
+  background-position: center; // 背景图片位置
 
-  overflow: hidden;//元素溢出时将溢出部分隐藏
-  overflow: auto;//纵向滚动，出现滚动条
-  overflow: scroll;//双向滚动，横纵都出现滚动条
+  background-size: auto; // 背景图片尺寸
 
-  white-space: nowrap;//元素内字符取消换行
-  white-space: pre;//字符每行缩近
-  white-space: pre-wrap;//字符每段缩近
+  background-size: 65%; // 百分比缩放
+
+  background-repeat: no-repeat; // 背景图片重复
+
+  opacity: 50%; // 元素透明度
+
+
+/* 容器边框 */
+
+  border-style: solid; // 边框样式
+
+  border-width: 1px; // 边框线宽度
+
+  border-radius: 12px; // 边框圆角
+
+  border-radius: 0 12px 1px 0; // 四个角自定义圆角
+
+
+/* 容器定位 */
+
+  position: fixed; // 容器绝对定位
+
+  position: absolute; // 容器相对当前页面定位
+
+  position: relative; // 容器相对当前位置偏移
+
+  top: 200px; // 容器纵向位置
+
+  left: 200px; // 容器横向位置
+
+  float: left; // 容器左浮动
+
+  float: right; // 容器右浮动
+
+
+/* 容器外边距 */
+
+  margin: 10px 20px 20px 30px; // 外边距按上左下右顺序排列
+
+  margin: 0 auto; // 上下边距为0，左右边距自动（居中）
+
+  margin-top: 10px; // 元素顶部距离上个元素位置
+
+  margin-left: 10px; // 左侧
+
+  margin-right: 10px; // 右侧
+
+  margin-bottom: 10px; // 底部
+
+
+/* 容器内边距 */
+
+  padding: 10px; // 容器内边距
+
+  padding: 10px 20px 1px 0; // 自动以容器四边内边距
+
+
+/* 容器阴影 */
+
+  box-shadow: 10px 5px 5px red; // 容器阴影(填入：x偏移量、y偏移量、模糊半径、扩散半径、颜色)
+
+
+/* 容器变换 */
+
+  transform: 30deg; // 旋转、缩放、倾斜、平移元素
+
+
+/* 容器显示 */
+
+  display: inline-block; // 将块元素转为行内元素
+
+  display: none; // 将元素隐藏
+
+  overflow: hidden; // 元素溢出时将溢出部分隐藏
+
+  overflow: auto; // 纵向滚动，出现滚动条
+
+  overflow: scroll; // 双向滚动，横纵都出现滚动条
 
 }
 </style>
 ```
 
+## flex布局
 
+```html
+<style lang="scss" scope>
+.box{
+  display: flex; // 启用flex布局
+
+  /* 父容器常用属性 */
+
+  .flex-direction: row | row-reverse | column | column-reverse; // 元素排列方向
+
+  .flex-wrap: nowrap | wrap | wrap-reverse; // 元素换行
+
+  .justify-content: flex-start | flex-end | center | space-between | space-around; // 元素在主轴的对齐方式(左右对齐方式)
+
+  .align-items: flex-start | flex-end | center | baseline | stretch; // 元素在交叉轴上的对齐方式(上下对齐方式)
+
+
+  .body{
+    
+    /* 子元素常用属性 */
+
+    .order: <integer>; // 元素的排列顺序，数值越小越靠前
+
+    .flex-grow: <number>; // 元素的放大比例
+
+    .flex-shrink: <number>; // 元素的缩小比例
+
+    .flex-basis: <length> | auto; // 定义了在分配多余空间之前，元素占据的主轴空间，浏览器会根据这个属性来计算主轴是否有多余空间。它的默认值为auto，即项目的本来大小
+
+    .align-self: auto | flex-start | flex-end | center | baseline | stretch; //允许单个元素有与其他元素不一样的对齐方式
+  }
+}
+</style>
+```
