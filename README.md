@@ -84,6 +84,8 @@
 
   - [105 页面静态化](#105-页面静态化)
 
+  - [106 发送邮件](#106-springboot发送邮件)
+
 - [CSS样式层叠](#css样式层叠)
   - [常用css样式](#常用css样式集合)
 
@@ -3873,6 +3875,182 @@ spring:
 ```
 
 
+
+## 106 springBoot发送邮件
+
+- 需求：有时候前端提交某些数据后，需要通知管理员或审核员进行数据审核，这时候就需要后台自动发送邮箱
+
+- 导入邮箱插件的依赖
+
+```xml
+<!-- 邮箱 -->
+<dependency>
+  <groupId>org.springframework.boot</groupId>
+  <artifactId>spring-boot-starter-mail</artifactId>
+</dependency>
+```
+
+- 在yml配置文件中导入对应依赖，具体的配置信息可以上网查
+```yml
+spring:
+  mail:
+    username: 123123@163.com # 用来发邮件的邮箱
+    password: ABDJSDIC # 邮箱的秘钥，不是登录密码，这个要在邮箱设置里去找
+    host: smtp.163.com # 邮箱对应的host
+    port: 465 # 开放的端口
+    protocol: smtp 
+    default-encoding: UTF-8
+    properties:
+      mail:
+        smtp:
+          auth: true
+          ssl:
+            enable: true
+          starttls:
+            enable: true
+          stattls:
+            required: true
+          socketFactory:
+            port: 465
+            class: javax.net.ssl.SSLSocketFactory
+```
+
+- 接下来可以开始编写发送邮件接口了
+
+```java
+
+import com.yjh.base.project.service.sys.EmailService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.stereotype.Service;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeMessage;
+import java.io.File;
+
+/**
+ * 发送邮件工具类 MailUtil
+ *
+ * @author lvyang
+ * @date 2021/3/22 16:52
+ */
+
+@Service
+public class EmailUtil implements EmailService
+{
+
+    @Autowired
+    private JavaMailSender mailSender;
+
+    // 配置文件中邮箱
+    @Value("${spring.mail.username}")
+    private String from;
+
+    /**
+     * 简单文本邮件
+     * @param to 收件人
+     * @param subject 主题
+     * @param content 内容
+     */
+    @Override
+    public void sendSimpleMail(String to, String subject, String content) {
+        //创建SimpleMailMessage对象
+        SimpleMailMessage message = new SimpleMailMessage();
+        //邮件发送人
+        message.setFrom(from);
+        //邮件接收人
+        message.setTo(to);
+        //邮件主题
+        message.setSubject(subject);
+        //邮件内容
+        message.setText(content);
+        //发送邮件
+        mailSender.send(message);
+    }
+
+    /**
+     * html邮件
+     * @param to 收件人,多个时参数形式 ："xxx@xxx.com,xxx@xxx.com,xxx@xxx.com"
+     * @param subject 主题
+     * @param content 内容
+     */
+    @Override
+    public void sendHtmlMail(String to, String subject, String content) {
+        //获取MimeMessage对象
+        MimeMessage message = mailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(message);
+        try {
+            // 设置邮件标题
+            helper.setSubject(subject);
+
+            // 设置邮件正文
+            helper.setText(content, true);
+
+            // 设置发件人地址
+            helper.setFrom(from);
+
+            // 设置收件人地址
+            helper.setTo(to);
+
+            //发送
+            mailSender.send(message);
+        } catch (Exception e) {
+            System.out.println("邮箱发送异常", e);
+        }
+    }
+
+    /**
+     * 带附件的邮件
+     * @param to 收件人
+     * @param subject 主题
+     * @param content 内容
+     * @param filePath 附件
+     */
+    @Override
+    public void sendAttachmentsMail(String to, String subject, String content, String filePath) {
+        MimeMessage message = mailSender.createMimeMessage();
+        try {
+            MimeMessageHelper helper = new MimeMessageHelper(message, true);
+            helper.setFrom(from);
+            helper.setTo(to);
+            helper.setSubject(subject);
+            helper.setText(content, true);
+
+            FileSystemResource file = new FileSystemResource(new File(filePath));
+            String fileName = filePath.substring(filePath.lastIndexOf(File.separator));
+            helper.addAttachment(fileName, file);
+            mailSender.send(message);
+        } catch (Exception e) {
+            System.out.println("邮箱发送异常", e);
+        }
+    }
+}
+
+```
+
+- 最后，完成邮箱内容字段的拼凑
+
+```java
+
+private EmailService emailService;
+
+public void sendMailTryout() {
+  // 邮箱主题标题
+  String subject="您有一条待审核的信息";
+  // 拼凑内容
+  String text="尊敬的"+"插入收件人姓名"+"您好，\n"+ // 收件人姓名
+      "您有一条来自XXX平台的待审核数据。\n数据标题："+"这里插入数据标题"+ // 客户姓名
+      "，\n数据内容："+"插入对应字段"+
+      "。\n祝您工作顺利，心情愉悦！";
+  // 收件人邮箱
+  String to = "收件人邮箱@abc.com"
+  // 发送邮件
+  emailService.sendSimpleMail(to, subject, text);
+}
+```
 
 # CSS样式层叠
 
