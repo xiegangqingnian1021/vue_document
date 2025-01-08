@@ -80,6 +80,10 @@
 
   - [103 二维码异常](#chapter-103)
 
+  - [104 列表内时间到达判定](#104-列表内时间到达判定)
+
+  - [105 页面静态化](#105-页面静态化)
+
 - [CSS样式层叠](#css样式层叠)
   - [常用css样式](#常用css样式集合)
 
@@ -3700,6 +3704,175 @@ for (BidBidding bidding : list) {
 ```
 
 
+## 105 页面静态化
+
+- 需求:将动态页面静态化，省去查数据库的步骤，节省流量，方便百度等网站爬虫爬取
+- 解决思路:使用thymeleaf模板引擎
+
+- Thymeleaf是适用于Web和独立环境的现代服务器端Java模板引擎
+
+- 首先在pom.xml中导入依赖
+<a href="https://developer.aliyun.com/article/769977">thymeleaf模板引擎使用教程</a>
+```xml
+<!-- thymeleaf模板引擎 -->
+<dependency>
+  <groupId>org.springframework.boot</groupId>
+  <artifactId>spring-boot-starter-thymeleaf</artifactId>
+</dependency>
+```
+
+- 在yml配置文件中的spring下加入thymeleaf的配置
+```yml
+spring:
+  thymeleaf:
+    cache: false # 缓存,在开发时候建议关闭，上线后再开启
+    encoding: utf-8 # 字符集，使用utf-8即可
+    prefix: classpath:/templates/ # 静态页面模板的存放路径,默认在/resources/template文件夹
+    suffix: .html # 文件的后缀名
+    mode: LEGACYHTML5
+```
+
+- 开始编写静态页面模板
+- 首先在/resources/template/templates文件夹下创建一个html文件，文件名随意
+
+- 编写模板
+```html
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org"><!-- 我们需要在页面的头部加Thymeleaf标识，声明thymeleaf的语法 -->
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>这里的内容会变成页面的标签标题</title>
+
+    <!-- 可以在head里引入vue和element组件等 -->
+
+    <!-- 联网版本 -->
+    <!-- 引入elementui样式 -->
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css" />
+    <!-- 必须先引入vue，再引入elementui -->
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.7.9"></script>
+    <!-- 引入elementui组件库-->
+    <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+</head>
+
+<body>
+    <div>
+        <!--
+            页面元素在body内编辑，
+            可以先写一个测试页面出来，数据内容都正常填写，方便看效果
+        -->
+        <div>
+            例：
+            <p>姓名：张三</p>
+            <p>年龄：90岁</p>
+            <p>性别：女</p>
+            <p>爱好：吃</p>
+        </div>
+
+        <!-- 
+            在标签属性中插入thymeleaf语法替换标签内容
+         -->
+        <div>
+            语法介绍：
+            th:id 替换标签的id <input th:id="${user.id}" />
+            th:text 替换标签内的文本 <p text:="${user.name}">张三</p>
+            th:utext 支持html的文本替换 <p utext:="${htmlcontent}">这是一段文字</p>
+            th:object 替换对象 <div th:object="${user}"></div>
+            th:value 替换值 <input th:value="${user.name}">
+            th:src 替换资源<img th:src="@{imgUrl}"></img>
+            th:href 替换超链接 <a th:href="@{index.html}">超链接</a>
+            th:each 迭代循环 <tr th:each="student:${user}">
+        </div>
+
+        <div>
+            例：
+            <p th:text:="姓名：${user.name}">姓名：张三</p>
+            <p th:text:="年龄：${user.age}岁">年龄：90岁</p>
+            <p th:text:="性别：${user.sex}">性别：女</p>
+            <p th:text:="爱好：${user.like}">爱好：吃</p>
+
+            <!-- 图片 -->
+            <img th:src="@{user.imgUrl}">
+
+            <!-- 如果需要循环遍历出来展示的数据，例如数据列表、轮播图等，使用th:each -->
+            例：
+            <!-- 现有列表:
+                arr=[{
+                        name:张三,
+                        age:3,
+                    },
+                    {
+                        name:李四,
+                        age:4,
+                    },
+                    {
+                        name:王五,
+                        age:5,
+                    }]
+         -->
+            <table>
+                <tr th:each:="item:${arr}">
+                    <td>
+                        <div th:text="姓名：${item.name}">标签内部的内容会被替换掉</div>
+                        <div th:text="年龄：${item.age}">如果生成模板时没有传入对应数据，则会忽略对应标签的thymeleaf语法，展示标签的原本内容</div>
+                    </td>
+                </tr>
+            </table>
+
+            </tr>
+        </div>
+    </div>
+</body>
+
+</html>
+
+```
+
+- 模板写完后，就可以在springboot内进行调用了
+
+```java
+
+/**
+     * 删除静态文件
+     */
+    public File delHtml(String id) { 
+    File dest = new File(destPath, id + ".html"); // 判断文件是否存在，如果存在就删除
+        if (dest.exists()) {
+        dest.delete();
+    }
+        return dest;
+    }
+
+/**
+     * 页面静态化
+     */
+    public void createHtml(String id, Data data) { // 这里传入id，用于定义静态页面的文件名,data是要静态化的实体类
+        // 如果文件存在，删除
+        File dest = delHtml(id);
+
+        // 上下文
+        Context context = new Context();
+
+        // 这里双引号里的内容是页面模板里定义的变量名
+        context.setVariable("user", data.user);
+
+        // 列表
+        context.setVariable("arr", data.list);
+
+        // 生成静态文件
+        try (PrintWriter writer = new PrintWriter(dest, "UTF-8")) {
+            // 生成html，第一个参数是thymeleaf页面下的原型名称
+            templateEngine.process("product", context, writer);
+        } catch (Exception e) {
+            log.error("[静态页服务]：生成静态页异常");
+        }
+    }
+
+```
+
+
 
 # CSS样式层叠
 
@@ -3775,8 +3948,6 @@ for (BidBidding bidding : list) {
   white-space: pre;//字符每行缩近
   white-space: pre-wrap;//字符每段缩近
 
-
-  
 }
 </style>
 ```
